@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{078869BC-5E77-4F5D-BCD0-3FE0D4AEB3DD}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESRI.PrototypeLab.ZetaControls</RootNamespace>
+    <AssemblyName>ESRI.PrototypeLab.ZetaControls</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ESRI.ArcGIS.Catalog, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.CatalogUI, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.Geodatabase, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.NetworkAnalysis, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.System, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Windows.Shell, Version=3.5.41019.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\Microsoft Ribbon for WPF\Microsoft.Windows.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="RibbonControlsLibrary, Version=4.0.0.11019, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\Microsoft Ribbon for WPF\RibbonControlsLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="GeometricNetworkWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompactRibbonApplicationMenu.cs" />
+    <Compile Include="IsNotNullToVisibilityConverter.cs" />
+    <Compile Include="IsNullToVisibilityConverter.cs" />
+    <Compile Include="ResultType.cs" />
+    <Compile Include="RuleCardinalityConverter.cs" />
+    <Compile Include="RuleDataGridColumn.cs" />
+    <Compile Include="RuleMatrix.cs" />
+    <Compile Include="EnumValuesExtension.cs" />
+    <Compile Include="ErrorItem.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="SnapTolerance.cs" />
+    <Compile Include="SubtypeDataGridColumn.cs" />
+    <Compile Include="ZField.cs" />
+    <Compile Include="ZFieldType.cs" />
+    <Compile Include="ZNetWeightAssocation.cs" />
+    <Compile Include="GeometricNetworkLoader.cs" />
+    <Compile Include="GeometricNetworkViewModel.cs" />
+    <Compile Include="GeometricNetworkWindow.xaml.cs">
+      <DependentUpon>GeometricNetworkWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InformationItem.cs" />
+    <Compile Include="MessageEventArgs.cs" />
+    <Compile Include="MessageItem.cs" />
+    <Compile Include="MessageType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="ViewModel.cs" />
+    <Compile Include="WarningItem.cs" />
+    <Compile Include="ZAssociation.cs" />
+    <Compile Include="ZDataset.cs" />
+    <Compile Include="ZDefaultSubtype.cs" />
+    <Compile Include="ZEdgeConnectivityRule.cs" />
+    <Compile Include="ZFeatureClass.cs" />
+    <Compile Include="ZGeometricNetwork.cs" />
+    <Compile Include="ZJunctionConnectivityRule.cs" />
+    <Compile Include="ZNetworkClass.cs" />
+    <Compile Include="ZObject.cs" />
+    <Compile Include="ZPath.cs" />
+    <Compile Include="ZNetWeight.cs" />
+    <Compile Include="ZRule.cs" />
+    <Compile Include="ZSubtype.cs" />
+    <Compile Include="ZWeightType.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Error16.png" />
+    <Resource Include="Images\Information16.png" />
+    <Resource Include="Images\Warning16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Open32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Save32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Redo32.png" />
+    <Resource Include="Images\Undo32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Log32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Import32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Export32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\GeodatabaseFeatureClassLine16.png" />
+    <Resource Include="Images\GeodatabaseFeatureClassPoint16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\TableFeatureClassPolygon16.png" />
+    <Resource Include="Images\DefaultRule16.png" />
+    <Resource Include="Icons\Zeta.ico" />
+    <Resource Include="Images\Zeta32.png" />
+    <Resource Include="Images\Zeta16.png" />
+    <Resource Include="Images\Exit32.png" />
+    <Resource Include="Images\Close32.png" />
+    <Resource Include="Images\Help32.png" />
+    <Resource Include="Images\ClassAdd32.png" />
+    <Resource Include="Images\ClassRemove32.png" />
+    <Resource Include="Images\JunctionAdd32.png" />
+    <Resource Include="Images\JunctionRemove32.png" />
+    <Resource Include="Images\WeightAdd32.png" />
+    <Resource Include="Images\WeightRemove32.png" />
+    <Resource Include="Images\Print32.png" />
+    <Resource Include="Images\PrintDevice32.png" />
+    <Resource Include="Images\PrintLandscape32.png" />
+    <Resource Include="Images\PrintMargin32.png" />
+    <Resource Include="Images\PrintOrientation32.png" />
+    <Resource Include="Images\PrintPortrait32.png" />
+    <Resource Include="Images\PrintPreview32.png" />
+    <Resource Include="Images\PrintSize32.png" />
+    <None Include="_modCommon.bas" />
+    <None Include="_modImportExport.bas" />
+    <None Include="_modUtility.bas" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xceed.Wpf.AvalonDock.Themes.Aero\Xceed.Wpf.AvalonDock.Themes.Aero.csproj">
+      <Project>{ba72cce0-a9fb-4995-b496-7fec5c87b85b}</Project>
+      <Name>Xceed.Wpf.AvalonDock.Themes.Aero</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.csproj">
+      <Project>{db81988f-e0f2-45a0-a1fd-8c37f3d35244}</Project>
+      <Name>Xceed.Wpf.AvalonDock</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\SaveAs32.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

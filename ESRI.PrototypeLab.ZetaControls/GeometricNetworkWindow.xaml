@@ -1,0 +1,784 @@
+﻿<ribbon:RibbonWindow
+    x:Class="ESRI.PrototypeLab.ZetaControls.GeometricNetworkWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ribbon="http://schemas.microsoft.com/winfx/2006/xaml/presentation/ribbon"
+    xmlns:local="clr-namespace:ESRI.PrototypeLab.ZetaControls"
+    xmlns:geodatabase="clr-namespace:ESRI.ArcGIS.Geodatabase;assembly=ESRI.ArcGIS.Geodatabase"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"  
+    xmlns:avalonDock="http://schemas.xceed.com/wpf/xaml/avalondock"
+    AllowDrop="True"
+    Height="600"
+    Width="800"
+    Icon="/ESRI.PrototypeLab.ZetaControls;component/Icons/Zeta.ico"
+    >
+    <ribbon:RibbonWindow.Resources>
+        <local:IsNullToVisibilityConverter x:Key="IsNullToVisibilityConverter"/>
+        <local:IsNotNullToVisibilityConverter x:Key="IsNotNullToVisibilityConverter"/>
+        <local:RuleCardinalityConverter x:Key="RuleCardinalityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:EnumValuesExtension x:Key="EnumValuesExtension"/>
+        <DataTemplate x:Key="SubtypeCellTemplate">
+            <Grid>
+                <TextBlock Margin="3,0,0,0" Text="{Binding Path=EdgeSubtype.Name, Mode=OneWay}" FontSize="10" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="JunctionTemplate">
+            <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0" Width="16" Stretch="None" VerticalAlignment="Top" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassPoint16.png"/>
+                <Grid Grid.Column="2" VerticalAlignment="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" FontSize="10" FontWeight="Bold" Text="{Binding Path=Parent.Path.Table}" />
+                    <TextBlock Grid.Row="1" FontSize="10" Text="{Binding Path=Name}" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="JunctionRuleCellTemplate">
+            <Grid x:Name="grid" Margin="3,0,3,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock FontSize="10" Text="{Binding Path=EdgeMinimum, Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=EdgeMinimum}"/>
+                        <TextBlock FontSize="10" Text="4" FontFamily="Webdings" VerticalAlignment="Center"/>
+                        <TextBlock FontSize="10" Text="{Binding Path=EdgeMaximum, Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=EdgeMaximum}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock FontSize="10" Text="{Binding Path=JunctionMinimum, Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=JunctionMinimum}"/>
+                        <TextBlock FontSize="10" Text="4" FontFamily="Webdings" VerticalAlignment="Center"/>
+                        <TextBlock FontSize="10" Text="{Binding Path=JunctionMaximum, Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=JunctionMaximum}"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Column="2">
+                    <Image Width="16" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/DefaultRule16.png" Visibility="{Binding Path=IsDefault, Converter={StaticResource ResourceKey=BooleanToVisibilityConverter}}"/>
+                </Grid>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding }" Value="{x:Null}">
+                    <Setter TargetName="grid" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+        <DataTemplate x:Key="JunctionRuleFeatureclassHeaderTemplate">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Image Grid.Row="0" Width="16" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassPoint16.png"/>
+                <TextBlock Grid.Row="1" TextAlignment="Center" FontSize="10" FontWeight="Bold" Text="{Binding Path=Parent.Path.Table}"/>
+                <TextBlock Grid.Row="2" TextAlignment="Center" FontSize="10" Text="{Binding Path=Name}"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="EdgeRuleFeatureclassHeaderTemplate">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Image Grid.Row="0" Width="16" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassLine16.png"/>
+                <TextBlock Grid.Row="1" TextAlignment="Center" FontSize="10" FontWeight="Bold" Text="{Binding Path=Parent.Path.Table}"/>
+                <TextBlock Grid.Row="2" TextAlignment="Center" FontSize="10" Text="{Binding Path=Name}"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="EdgeRuleCellTemplate">
+            <Grid x:Name="grid" Margin="3,0,3,0">
+                <ListView SelectedValue="{Binding Path=DefaultJunction}"
+                          ItemsSource="{Binding Path=Junctions}"
+                          ItemTemplate="{StaticResource ResourceKey=JunctionTemplate}" 
+                          BorderThickness="0"
+                          IsHitTestVisible="False"
+                          Background="Transparent">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Grid>
+                                            <Image
+                                                x:Name="image"
+                                                Width="16"
+                                                Stretch="None"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Left"
+                                                Source="/ESRI.PrototypeLab.ZetaControls;component/Images/DefaultRule16.png"
+                                                Visibility="Collapsed" Margin="0,0,0,3"
+                                                />
+                                            <ContentPresenter />
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="true">
+                                                <Setter TargetName="image" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding }" Value="{x:Null}">
+                    <Setter TargetName="grid" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+        <Style x:Key="EdgeRuleHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <x:Array x:Key="RuleCardinality" Type="{x:Type sys:Int32}">
+            <sys:Int32>-1</sys:Int32>
+            <sys:Int32>0</sys:Int32>
+            <sys:Int32>1</sys:Int32>
+            <sys:Int32>2</sys:Int32>
+            <sys:Int32>3</sys:Int32>
+            <sys:Int32>4</sys:Int32>
+            <sys:Int32>5</sys:Int32>
+            <sys:Int32>6</sys:Int32>
+            <sys:Int32>7</sys:Int32>
+            <sys:Int32>8</sys:Int32>
+            <sys:Int32>9</sys:Int32>
+            <sys:Int32>10</sys:Int32>
+        </x:Array>
+    </ribbon:RibbonWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ribbon:Ribbon x:Name="Ribbon" Grid.Row="0" Title="{Binding Path=WindowTitle}" ShowQuickAccessToolBarOnTop="True">
+            <ribbon:Ribbon.HelpPaneContentTemplate>
+                <DataTemplate>
+                    <ribbon:RibbonButton x:Name="RibbonButtonHelp" SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Help32.png" />
+                </DataTemplate>
+            </ribbon:Ribbon.HelpPaneContentTemplate>
+            <ribbon:Ribbon.ApplicationMenu>
+                <local:CompactRibbonApplicationMenu SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Zeta16.png">
+                    <ribbon:RibbonApplicationMenuItem x:Name="MenuItemExit" Header="Exit" ImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Exit32.png"/>
+                </local:CompactRibbonApplicationMenu>
+            </ribbon:Ribbon.ApplicationMenu>
+            <ribbon:RibbonTab x:Name="RibbonTabHome" Header="Home" KeyTip="H" GroupSizeReductionOrder="Manage, Exchange">
+                <ribbon:RibbonGroup Header="Document" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonButton
+                        x:Name="ButtonOpen"
+                        Label="Open"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Open32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Open32.png" 
+                        KeyTip="O"
+                        ToolTip="Open document"
+                        />
+                    <!--<ribbon:RibbonSplitButton  
+                        x:Name="ButtonSave"
+                        Label="Save"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png"
+                        >
+                        <ribbon:RibbonMenuItem x:Name="ButtonSave2" Header="Save" ImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png"  />
+                        <ribbon:RibbonMenuItem x:Name="ButtonSaveAs" Header="Save As" ImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png" />
+                    </ribbon:RibbonSplitButton>-->
+                    <ribbon:RibbonButton  
+                        x:Name="ButtonSave"
+                        Label="Save"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Save32.png"
+                        KeyTip="S"
+                        ToolTip="Save document"
+                        />
+                    <ribbon:RibbonButton  
+                        x:Name="ButtonSaveAs"
+                        Label="Save As"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/SaveAs32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/SaveAs32.png"
+                        KeyTip="R"
+                        ToolTip="Save As New Document"
+                        />
+                    <ribbon:RibbonButton
+                        x:Name="ButtonClose"
+                        Label="Close"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Close32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Close32.png"
+                        KeyTip="C"
+                        ToolTip="Close document"
+                        />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Schema" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonButton
+                        x:Name="ButtonImport"
+                        Label="Import"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Import32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Import32.png" 
+                        KeyTip="I"
+                        ToolTip="Import schema from a geometric network"
+                        />
+                    <ribbon:RibbonButton
+                        x:Name="ButtonExport"
+                        Label="Export"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Export32.png"
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Export32.png"
+                        KeyTip="E"
+                        ToolTip="Export schema to a geometric network"
+                        />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Windows" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonButton 
+                        x:Name="ButtonOutput"
+                        Label="Output"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Log32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Log32.png" 
+                        KeyTip="O"
+                        ToolTip="Display output messages"
+                        />
+                </ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
+            <ribbon:RibbonTab x:Name="RibbonTabEditor" Header="Editor" KeyTip="E">
+                <ribbon:RibbonGroup Header="Classes" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonButton 
+                        x:Name="ButtonClassAdd"
+                        Label="Add"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/ClassAdd32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/ClassAdd32.png" 
+                        KeyTip="A"
+                        ToolTip="Add a network class"
+                        />
+                    <ribbon:RibbonButton 
+                        x:Name="ButtonClassRemove"
+                        Label="Remove"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/ClassRemove32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/ClassRemove32.png" 
+                        KeyTip="R"
+                        ToolTip="Remove a selected network class"
+                        />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Weights" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonButton 
+                        x:Name="ButtonWeightAdd"
+                        Label="Add"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/WeightAdd32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/WeightAdd32.png" 
+                        KeyTip="X"
+                        ToolTip="Add a network weight"
+                        />
+                    <ribbon:RibbonButton 
+                        x:Name="ButtonWeightRemove"
+                        Label="Remove"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/WeightRemove32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/WeightRemove32.png" 
+                        KeyTip="V"
+                        ToolTip="Remove a selected network weight"
+                        />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Junction Rules" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonControl>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ribbon:RibbonButton
+                                x:Name="ButtonJunctionAdd"
+                                Grid.Column="0"
+                                Label="Add"
+                                SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionAdd32.png" 
+                                LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionAdd32.png" 
+                                KeyTip="R"
+                                ToolTip="Add a junction rule"
+                                />
+                            <ribbon:RibbonButton
+                                x:Name="ButtonJunctionRemove"
+                                Margin="0,0,10,0"
+                                Grid.Column="1"
+                                Label="Remove"
+                                SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionRemove32.png" 
+                                LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionRemove32.png" 
+                                KeyTip="S"
+                                ToolTip="Remove a selected junction rule"
+                                />
+                            <ribbon:RibbonSeparator Grid.Column="1">
+                                <ribbon:RibbonSeparator.LayoutTransform>
+                                    <RotateTransform Angle="90"/>
+                                </ribbon:RibbonSeparator.LayoutTransform>
+                            </ribbon:RibbonSeparator>
+                            <Grid x:Name="GridJunctionRuleCardinality" Grid.Column="2" Margin="10,0,10,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="Min" HorizontalAlignment="Left"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="Max" HorizontalAlignment="Left"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Edge" HorizontalAlignment="Left"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Junc" HorizontalAlignment="Left"/>
+                                <ribbon:RibbonComboBox Grid.Row="1" Grid.Column="1" SelectionBoxWidth="20" VerticalAlignment="Center" IsEditable="True">
+                                    <ribbon:RibbonGallery SelectedValue="{Binding Path=SelectedJunctionRule.EdgeMinimum, Mode=TwoWay}" MaxColumnCount="1" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                        <ribbon:RibbonGalleryCategory ItemsSource="{Binding Source={StaticResource ResourceKey=RuleCardinality}}">
+                                            <ribbon:RibbonGalleryCategory.ItemTemplate>
+                                                <DataTemplate>
+                                                    <ribbon:RibbonGalleryItem Content="{Binding Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=EdgeMinimum}" />
+                                                </DataTemplate>
+                                            </ribbon:RibbonGalleryCategory.ItemTemplate>
+                                        </ribbon:RibbonGalleryCategory>
+                                    </ribbon:RibbonGallery>
+                                </ribbon:RibbonComboBox>
+                                <ribbon:RibbonComboBox Grid.Row="1" Grid.Column="2" SelectionBoxWidth="20" VerticalAlignment="Center" IsEditable="True">
+                                    <ribbon:RibbonGallery SelectedValue="{Binding Path=SelectedJunctionRule.EdgeMaximum, Mode=TwoWay}" MaxColumnCount="1" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                        <ribbon:RibbonGalleryCategory ItemsSource="{Binding Source={StaticResource ResourceKey=RuleCardinality}}">
+                                            <ribbon:RibbonGalleryCategory.ItemTemplate>
+                                                <DataTemplate>
+                                                    <ribbon:RibbonGalleryItem Content="{Binding Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=EdgeMaximum}" />
+                                                </DataTemplate>
+                                            </ribbon:RibbonGalleryCategory.ItemTemplate>
+                                        </ribbon:RibbonGalleryCategory>
+                                    </ribbon:RibbonGallery>
+                                </ribbon:RibbonComboBox>
+                                <ribbon:RibbonComboBox Grid.Row="2" Grid.Column="1" SelectionBoxWidth="20" VerticalAlignment="Center" IsEditable="True">
+                                    <ribbon:RibbonGallery SelectedValue="{Binding Path=SelectedJunctionRule.JunctionMinimum, Mode=TwoWay}" MaxColumnCount="1" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                        <ribbon:RibbonGalleryCategory ItemsSource="{Binding Source={StaticResource ResourceKey=RuleCardinality}}">
+                                            <ribbon:RibbonGalleryCategory.ItemTemplate>
+                                                <DataTemplate>
+                                                    <ribbon:RibbonGalleryItem Content="{Binding Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=JunctionMinimum}" />
+                                                </DataTemplate>
+                                            </ribbon:RibbonGalleryCategory.ItemTemplate>
+                                        </ribbon:RibbonGalleryCategory>
+                                    </ribbon:RibbonGallery>
+                                </ribbon:RibbonComboBox>
+                                <ribbon:RibbonComboBox Grid.Row="2" Grid.Column="2" SelectionBoxWidth="20" VerticalAlignment="Center" IsEditable="True">
+                                    <ribbon:RibbonGallery SelectedValue="{Binding Path=SelectedJunctionRule.JunctionMaximum, Mode=TwoWay}" MaxColumnCount="1" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                        <ribbon:RibbonGalleryCategory ItemsSource="{Binding Source={StaticResource ResourceKey=RuleCardinality}}">
+                                            <ribbon:RibbonGalleryCategory.ItemTemplate>
+                                                <DataTemplate>
+                                                    <ribbon:RibbonGalleryItem Content="{Binding Converter={StaticResource ResourceKey=RuleCardinalityConverter}, ConverterParameter=JunctionMaximum}" />
+                                                </DataTemplate>
+                                            </ribbon:RibbonGalleryCategory.ItemTemplate>
+                                        </ribbon:RibbonGalleryCategory>
+                                    </ribbon:RibbonGallery>
+                                </ribbon:RibbonComboBox>
+                            </Grid>
+                            <ribbon:RibbonSeparator Grid.Column="3">
+                                <ribbon:RibbonSeparator.LayoutTransform>
+                                    <RotateTransform Angle="90"/>
+                                </ribbon:RibbonSeparator.LayoutTransform>
+                            </ribbon:RibbonSeparator>
+                            <Grid Grid.Column="4" Margin="10,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ribbon:RibbonToggleButton
+                                    x:Name="ButtonJunctionSetAsDefault"
+                                    Grid.Row="0"
+                                    Label="Default"
+                                    SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/DefaultRule16.png"
+                                    KeyTip="D"
+                                    ToolTip="Set as default junction"
+                                    />
+                            </Grid>
+                        </Grid>
+                    </ribbon:RibbonControl>
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Edge Rules" CanAddToQuickAccessToolBarDirectly="False">
+                    <ribbon:RibbonMenuButton
+                        x:Name="ButtonEdgeAddJunction"
+                        Label="Add Junction"
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionAdd32.png"
+                        ToolTip="Add junctions"
+                        ToolTipDescription="Change junctions that are permitted at the intersection of from and to edges."
+                        KeyTip="C"
+                        CanUserResizeVertically="True"
+                        DropDownHeight="200" 
+                        >
+                        <ribbon:RibbonGallery x:Name="RibbonGalleryEdgeAddJunction" MaxColumnCount="1">
+                            <ribbon:RibbonGalleryCategory x:Name="RibbonGalleryCategoryEdgeAddJunction" ItemTemplate="{StaticResource ResourceKey=JunctionTemplate}" />
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonMenuButton>
+                    <ribbon:RibbonMenuButton
+                        x:Name="ButtonEdgeRemoveJunction"
+                        Label="Remove Junction"
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionRemove32.png"
+                        ToolTip="Remove junctions"
+                        ToolTipDescription="Change junctions that are permitted at the intersection of from and to edges."
+                        KeyTip="C"
+                        CanUserResizeVertically="True"
+                        DropDownHeight="200" 
+                        >
+                        <ribbon:RibbonGallery x:Name="RibbonGalleryEdgeRemoveJunction" MaxColumnCount="1">
+                            <ribbon:RibbonGalleryCategory x:Name="RibbonGalleryCategoryEdgeRemoveJunction" ItemTemplate="{StaticResource ResourceKey=JunctionTemplate}" />
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonMenuButton>
+                    <ribbon:RibbonMenuButton
+                        x:Name="ButtonEdgeDefaultJunction"
+                        Label="Default Junction"
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/JunctionRemove32.png"
+                        ToolTip="Default junctions"
+                        ToolTipDescription="Default junction at the intersection of from and to edges."
+                        KeyTip="C"
+                        CanUserResizeVertically="True"
+                        DropDownHeight="200" 
+                        >
+                        <ribbon:RibbonGallery x:Name="RibbonGalleryEdgeDefaultJunction" MaxColumnCount="1">
+                            <ribbon:RibbonGalleryCategory x:Name="RibbonGalleryCategoryEdgeDefaultJunction" ItemTemplate="{StaticResource ResourceKey=JunctionTemplate}" />
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonMenuButton>
+                </ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
+            <ribbon:RibbonTab Header="Review" KeyTip="P">
+                <ribbon:RibbonGroup Header="Setup" CanAddToQuickAccessToolBarDirectly="False" IsEnabled="False">
+                    <ribbon:RibbonMenuButton
+                        Label="Device"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintDevice32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintDevice32.png" 
+                        KeyTip="D"
+                        ToolTip="Printer device"
+                        >
+                    </ribbon:RibbonMenuButton>
+                    <ribbon:RibbonMenuButton
+                        Label="Orientation"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintOrientation32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintOrientation32.png" 
+                        KeyTip="O"
+                        ToolTip="Printer orientation"
+                        >
+                        <ribbon:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                            <ribbon:RibbonGalleryCategory>
+                                <ribbon:RibbonGalleryItem KeyTip="P">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintPortrait32.png" />
+                                        <TextBlock Margin="10,0,10,0" Text="Portrait" />
+                                    </StackPanel>
+                                </ribbon:RibbonGalleryItem>
+                                <ribbon:RibbonGalleryItem KeyTip="L">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintLandscape32.png" />
+                                        <TextBlock Margin="10,0,10,0" Text="Landscape" />
+                                    </StackPanel>
+                                </ribbon:RibbonGalleryItem>
+                            </ribbon:RibbonGalleryCategory>
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonMenuButton>
+                    <ribbon:RibbonMenuButton
+                        Label="Margin"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintMargin32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintMargin32.png" 
+                        KeyTip="M"
+                        ToolTip="Select a margin size"
+                        >
+                    </ribbon:RibbonMenuButton>
+                    <ribbon:RibbonMenuButton
+                        Label="Size"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintSize32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintSize32.png" 
+                        KeyTip="S"
+                        ToolTip="Printer size"
+                        >
+                    </ribbon:RibbonMenuButton>
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Print" CanAddToQuickAccessToolBarDirectly="False" IsEnabled="False">
+                    <ribbon:RibbonButton
+                        x:Name="ButtonPrint"
+                        Label="Print"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Print32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/Print32.png" 
+                        KeyTip="P"
+                        ToolTip="Print"
+                        />
+                    <ribbon:RibbonButton
+                        x:Name="ButtonPrintPreview"
+                        Label="Print Preview"
+                        SmallImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintPreview32.png" 
+                        LargeImageSource="/ESRI.PrototypeLab.ZetaControls;component/Images/PrintPreview32.png" 
+                        KeyTip="V"
+                        ToolTip="Print Preview"
+                        />
+                </ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
+        </ribbon:Ribbon>
+        <avalonDock:DockingManager x:Name="dockManager" Grid.Row="1" Visibility="Visible">
+            <avalonDock:LayoutRoot>
+                <avalonDock:LayoutPanel Orientation="Horizontal">
+                    <avalonDock:LayoutDocumentPane x:Name="DocumentPane" >
+                        <avalonDock:LayoutDocument x:Name="LayoutDocumentClasses" Title="Classes" CanClose="False">
+                            <DataGrid
+                                x:Name="DataGridNetworkClasses"
+                                ItemsSource="{Binding Path=(local:ViewModel.Dataset).(local:ZGeometricNetwork.NetworkClasses)}"
+                                AutoGenerateColumns="False"
+                                FrozenColumnCount="1"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                CanUserReorderColumns="True"
+                                CanUserResizeColumns="True"
+                                CanUserResizeRows="False"
+                                CanUserSortColumns="True"
+                                BorderThickness="0"
+                                SelectionMode="Single"
+                                SelectionUnit="FullRow"
+                                >
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Name" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="5"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Image Grid.Column="0" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassPoint16.png" Visibility="{Binding Path=IsJunction, Converter={StaticResource ResourceKey=BooleanToVisibilityConverter}}"/>
+                                                    <Image Grid.Column="0" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassLine16.png" Visibility="{Binding Path=IsEdge, Converter={StaticResource ResourceKey=BooleanToVisibilityConverter}}"/>
+                                                    <!--<TextBox Grid.Column="1" Margin="3,0,0,0" Text="{Binding Mode=TwoWay, Path=Path.Table, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" />-->
+                                                    <TextBlock Grid.Column="1" Margin="3,0,0,0" Text="{Binding Path=Path.Table}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Complex" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding Path=IsComplex}" IsEnabled="{Binding Path=IsEdge}" HorizontalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Source/Sink" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding Path=IsSourceSink, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Path=IsJunction}" HorizontalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </avalonDock:LayoutDocument>
+                        <avalonDock:LayoutDocument x:Name="LayoutDocumentWeights" Title="Weights" CanClose="False">
+                            <DataGrid
+                                x:Name="DataGridWeights"
+                                ItemsSource="{Binding Path=(local:ViewModel.Dataset).(local:ZGeometricNetwork.Weights)}"
+                                AutoGenerateColumns="False"
+                                FrozenColumnCount="1"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                CanUserReorderColumns="True"
+                                CanUserResizeColumns="True"
+                                CanUserResizeRows="False"
+                                CanUserSortColumns="True"
+                                BorderThickness="0"
+                                SelectionMode="Single"
+                                SelectionUnit="FullRow"
+                                >
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Name" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Image Grid.Column="0" Stretch="None" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/TableFeatureClassPolygon16.png"/>
+                                                    <TextBox Grid.Column="1" Margin="3,0,0,0" Text="{Binding Mode=TwoWay, Path=Name}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Type" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{local:EnumValuesExtension local:ZWeightType}" SelectedValue="{Binding Mode=TwoWay, Path=WeightType}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Size" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding Path=BitGateSize}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </avalonDock:LayoutDocument>
+                        <avalonDock:LayoutDocument x:Name="LayoutDocumentJunctionRules" Title="Junction Rules" CanClose="False">
+                            <DataGrid
+                                x:Name="DataGridJunctionRules"
+                                AutoGenerateColumns="True"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                CanUserReorderColumns="True"
+                                CanUserResizeColumns="True"
+                                CanUserResizeRows="False"
+                                CanUserSortColumns="True"
+                                FrozenColumnCount="1"
+                                IsReadOnly="True"
+                                BorderThickness="0"
+                                SelectionMode="Single"
+                                SelectionUnit="Cell"
+                                ItemsSource="{Binding Path=JunctionRuleDataSource}"
+                                ScrollViewer.ScrollChanged="DataGrid_ScrollChanged"
+                                >
+                                <DataGrid.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Path=EdgeFeatureClass}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                        <GroupStyle.ContainerStyle>
+                                            <Style TargetType="{x:Type GroupItem}">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                            <Grid Margin="0,3,0,0">
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+                                                                <Grid Grid.Row="0" Tag="groupheader">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Image Grid.Column="0" Margin="5,0,0,0" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassLine16.png" Stretch="None" />
+                                                                    <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding Path=Name}" FontWeight="Bold" FontSize="10"/>
+                                                                </Grid>
+                                                                <ItemsPresenter Grid.Row="1" />
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GroupStyle.ContainerStyle>
+                                    </GroupStyle>
+                                </DataGrid.GroupStyle>
+                            </DataGrid>
+                        </avalonDock:LayoutDocument>
+                        <avalonDock:LayoutDocument x:Name="LayoutDocumentEdgeRules" Title="Edge Rules" CanClose="False">
+                            <DataGrid
+                                x:Name="DataGridEdgeRules"
+                                AutoGenerateColumns="True"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                CanUserReorderColumns="True"
+                                CanUserResizeColumns="True"
+                                CanUserResizeRows="False"
+                                CanUserSortColumns="True"
+                                FrozenColumnCount="1"
+                                IsReadOnly="True"
+                                BorderThickness="0"
+                                SelectionMode="Single"
+                                SelectionUnit="Cell"
+                                ItemsSource="{Binding Path=EdgeRuleDataSource}"
+                                ScrollViewer.ScrollChanged="DataGrid_ScrollChanged"
+                                >
+                                <DataGrid.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Path=EdgeFeatureClass}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                        <GroupStyle.ContainerStyle>
+                                            <Style TargetType="{x:Type GroupItem}">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                            <Grid Margin="0,3,0,0">
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+                                                                <Grid Grid.Row="0" Tag="groupheader">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Image Grid.Column="0" Margin="5,0,0,0" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/GeodatabaseFeatureClassLine16.png" Stretch="None" />
+                                                                    <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding Path=Name}" FontWeight="Bold" FontSize="10"/>
+                                                                </Grid>
+                                                                <ItemsPresenter Grid.Row="1" />
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GroupStyle.ContainerStyle>
+                                    </GroupStyle>
+                                </DataGrid.GroupStyle>
+                            </DataGrid>
+                        </avalonDock:LayoutDocument>
+                    </avalonDock:LayoutDocumentPane>
+                    <avalonDock:LayoutAnchorablePane DockWidth="250">
+                        <avalonDock:LayoutAnchorable x:Name="DockableContentOutput" Title="Output" CanAutoHide="True" CanHide="True" CanClose="False" AutoHideWidth="250">
+                            <ItemsControl x:Name="ItemsControlMessage" BorderThickness="0,0,0,1" BorderBrush="#5590D2" Background="#F0F0F0" ItemsSource="{Binding Path=Messages}">
+                                <ItemsControl.Resources>
+                                    <DataTemplate DataType="{x:Type local:InformationItem}">
+                                        <Grid Margin="3,5,3,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/Information16.png" Height="16" Width="16" VerticalAlignment="Top" />
+                                            <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding Path=Message, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="{x:Type local:WarningItem}">
+                                        <Grid Margin="3,5,3,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/Warning16.png" Height="16" Width="16" VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding Path=Message, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="{x:Type local:ErrorItem}">
+                                        <Grid Margin="3,5,3,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" Source="/ESRI.PrototypeLab.ZetaControls;component/Images/Error16.png" Height="16" Width="16" VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding Path=Message, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.Resources>
+                                <ItemsControl.Template>
+                                    <ControlTemplate>
+                                        <ScrollViewer Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+                                            <ItemsPresenter />
+                                        </ScrollViewer>
+                                    </ControlTemplate>
+                                </ItemsControl.Template>
+                            </ItemsControl>
+                        </avalonDock:LayoutAnchorable>
+                    </avalonDock:LayoutAnchorablePane>
+                </avalonDock:LayoutPanel>
+            </avalonDock:LayoutRoot>
+        </avalonDock:DockingManager>
+    </Grid>
+</ribbon:RibbonWindow>
